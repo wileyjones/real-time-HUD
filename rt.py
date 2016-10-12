@@ -1,4 +1,14 @@
-# REAL TIME VIDEO ANALYSIS
+"""
+This code was largely adapted from the upcoming Udacity Self-Driving Nanodegree Project 0.
+
+Adaptations are moving this toward a real-time video processing algorithm that would allow
+for real-time video to be processed and displayed on a HUD in a vehicle.
+
+Additionally, common functions have been generalized and modularized
+to help the open-source community.
+"""
+
+# IMPROT LIBS
 import cv2
 import math
 import matplotlib.pyplot as plt
@@ -8,7 +18,8 @@ import time
 import sys
 
 
-"""FUNCTION DEFINITIONS"""
+"""------------ FUNCTION DEFINITIONS ------------"""
+
 def backspace(n):
     # print((b'\x08' * n).decode(), end='') # use \x08 char to go back
     print('\r' * n, end='')
@@ -84,14 +95,17 @@ def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
     return cv2.addWeighted(initial_img, α, img, β, λ)
 
 def image_smoothing(processed_image, image_array):
-    blank_image = np.zeros((processed_image["h"],processed_image["w"],3),np.float)
-    for im in image_array:
+    blank_image = np.zeros((processed_image["h"],processed_image["w"],3),np.float) #Creating blank image size of frame
+    for im in image_array: #loop over images in array
         imarr = np.array(im,dtype=np.float)
-        blank_image = blank_image + imarr / len(image_array)
-    image_smoothed =  np.array(np.round(blank_image),dtype=np.uint8)
+        blank_image = blank_image + imarr / len(image_array) # take average of all frames
+    image_smoothed =  np.array(np.round(blank_image),dtype=np.uint8) # float to int
     return image_smoothed
 
-"""MAIN PROCESSING"""
+
+
+
+"""------------- MAIN PROCESSING FLOW ---------------"""
 
 def process_image(img):
     # Image intialization, storing a copy as init_img
@@ -106,7 +120,6 @@ def process_image(img):
 
     #Region of Interest Masking
     region = np.array([[(0,height),(width/2, 4*height/7), (width/2, 4*height/7), (width,height)]], dtype=np.int32)
-    # Coefficients next to width and height are aribitrarily chosen, can be optimized in the future statistically
 
     image = region_of_interest(image, region)
 
@@ -122,7 +135,11 @@ def process_image(img):
 
     return {"image": image, "lines": image_lines, "init": init_img, "h": height, "w": width}
 
-"""VIDEO PROCESSING """
+
+
+
+
+"""--------------- VIDEO PROCESSING ---------------"""
 
 cap = cv2.VideoCapture('solidYellowLeft.mp4')
 
@@ -147,7 +164,7 @@ while(cap.isOpened()):
         image_array.append(processed["lines"]) #adding frames to image buffer
         frame_list.append(frame_no)
         line_list.append(line_no)
-        # limiting number of images to be averaged at 5
+        # limiting number of images to be averaged at X
         if len(image_array) > 3:
             del image_array[0]
 
@@ -165,7 +182,12 @@ while(cap.isOpened()):
 cap.release()
 cv2.destroyAllWindows()
 
-"""PLOTTING"""
+
+
+
+
+"""-------------- PLOTTING ----------------"""
+
 time_list = np.array(time_list)
 frame_list = np.array(frame_list)
 line_list = np.array(line_list)
